@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { checkIsValid } from "../utils/checkIsValid";
 import { calculateIntersection } from "../utils/calculateIntersection";
+import { getcordinates } from "../utils/getcordinate";
 import styles from "../styles/home.module.css";
 import { ICordinates, IIntersections } from "../types/types";
 
@@ -89,25 +90,8 @@ export default function Home() {
     });
   }, [cordinates, tempIntersections, intersections]);
 
-  const testDelete = async () => {
+  const deleteLinePoint = async () => {
     let steps = 0;
-    const getcordinates = ({ lines }) => {
-      const xmin = lines.xStart > lines.xEnd ? lines.xEnd : lines.xStart;
-      const ymin = lines.yStart > lines.yEnd ? lines.yEnd : lines.yStart;
-      const xmax = lines.xStart < lines.xEnd ? lines.xEnd : lines.xStart;
-      const ymax = lines.yStart < lines.yEnd ? lines.yEnd : lines.yStart;
-      let x = lines.xStart;
-      let y = lines.yStart;
-      let x1 = lines.xEnd;
-      let y1 = lines.yEnd;
-      const xStep = (xmax - xmin) / (300 - 2 * steps);
-      const yStep = (ymax - ymin) / (300 - 2 * steps);
-      x = lines.xStart < lines.xEnd ? x + xStep : x - xStep;
-      y = lines.yStart < lines.yEnd ? y + yStep : y - yStep;
-      x1 = lines.xStart > lines.xEnd ? x1 + xStep : x1 - xStep;
-      y1 = lines.yStart > lines.yEnd ? y1 + yStep : y1 - yStep;
-      return { xStart: x, yStart: y, xEnd: x1, yEnd: y1 };
-    };
     let initCordinates = [...cordinates];
     const ctx = ref.current.getContext("2d");
     function timeout(ms: number) {
@@ -117,7 +101,7 @@ export default function Home() {
     while (steps < 150) {
       await timeout(20);
       const cordinatestoDraw = initCordinates.map((lines) =>
-        getcordinates({ lines })
+        getcordinates({ lines, steps })
       );
 
       const intersectionsToDraw = [];
@@ -153,7 +137,6 @@ export default function Home() {
           }
         });
       });
-      console.log(intersectionsToDraw);
       ctx.clearRect(0, 0, 300, 300);
       cordinatestoDraw.forEach((line) => {
         ctx.beginPath();
@@ -173,7 +156,7 @@ export default function Home() {
     }
   };
   const handleCollapse = async () => {
-    await testDelete();
+    await deleteLinePoint();
     setCordinates([]);
     setIntersections([]);
     setTempIntersections([]);
